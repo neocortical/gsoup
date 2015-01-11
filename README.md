@@ -4,7 +4,7 @@
 
 Gsoup enables the sanitization of untrusted HTML markup for use in blogs, comments, etc. It is similar to Java's Jsoup or Ruby's Sanitizer (https://github.com/rgrove/sanitize). Go's x/net/html package is used under the hood for HTML parsing.
 
-[![Build Status](https://travis-ci.org/neocortical/gsoup.svg?branch=master)](https://travis-ci.org/neocortical/gsoup) [![Coverage](http://gocover.io/_badge/github.com/neocortical/gsoup?v=1)](http://gocover.io/github.com/neocortical/gsoup?v=1) [![GoDoc](https://godoc.org/github.com/neocortical/gsoup?status.svg)](https://godoc.org/github.com/neocortical/gsoup)
+[![Build Status](https://travis-ci.org/neocortical/gsoup.svg?branch=master)](https://travis-ci.org/neocortical/gsoup) [![Coverage](http://gocover.io/_badge/github.com/neocortical/gsoup)](http://gocover.io/github.com/neocortical/gsoup) [![GoDoc](https://godoc.org/github.com/neocortical/gsoup?status.svg)](https://godoc.org/github.com/neocortical/gsoup)
 
 ## Installation
 
