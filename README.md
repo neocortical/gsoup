@@ -35,23 +35,26 @@ cleaner = cleaner.RemoveTags(atom.P)
 
 var markup = `<p>deleted</p><div id="foo" class="bar">also saved</div><canvas></canvas>`
 
-doc, err := gsoup.NewBasicCleaner().Clean(markup)
+doc, err := gsoup.NewBasicCleaner().Clean(strings.NewReader(markup))
 // doc is a html.Node that will render '<div id="foo" class="bar">also saved</div><canvas></canvas>'
 
 // new Cleaner with no allowed tags
 cleaner = gsoup.NewEmptyCleaner()
+
+// enforce attrs (rel="nofollow" will be added to all anchor tags)
+cleaner = gsoup.NewEmptyCleaner().AddTags(T(atom.A).Enforce("rel", "nofollow"))
 ```
 
 ## TODO
 
-* Enforced attributes (e.g. rel="nofollow")
 * Protocol enforcement for src, href attributes
 * HTML transformers like in rgrove/sanitize
-* ???
 
 ## Caveats
 
 This package is in Alpha and may change. Comments, feature requests, bug reports, pull requests all welcome!
+
+Gsoup ignores XMl namespaces and is only useful for HTML sanitization. It relies on Go's x/net/html package, which is not officially part of the Go language, although I hope it is canonized soon.
 
 Version 0.4.0
 
