@@ -30,3 +30,10 @@ func Test_cloneWhitelist(t *testing.T) {
 	_, present := w1[atom.Div].AllowedAttrs["id"]
 	assert.True(t, present, "w1's tagdef should not be mutable thought w2")
 }
+
+func Test_normalizeAttrKey(t *testing.T) {
+	dirtyKey := "  key/\r\n\t >\"'=name\u0000バナナ \t"
+	key := normalizeAttrKey(dirtyKey)
+
+	assert.Equal(t, "keynameバナナ", key, "expected 'keynameバナナ' but got %s", key)
+}

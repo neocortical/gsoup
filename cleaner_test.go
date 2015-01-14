@@ -229,6 +229,41 @@ func Test_Clean_ShouldOverwriteEnforcedAttribute(t *testing.T) {
 	assert.Equal(t, `<a rel="nofollow">hello</a>`, actual, "should overwrite enforced attributes")
 }
 
+func Test_AllowedAttrNamesNormalized(t *testing.T) {
+	c := NewEmptyCleaner().AddTags(T(atom.A, "  key/\r\n\t >\"'=nameバナナ \t"))
+	input := "<a   key/\r\n\t >\"'=nameバナナ \t=\"bad\" keynameバナナ=\"good\">hello</a>"
+	doc, err := c.Clean(strings.NewReader(input))
+	assert.Nil(t, err, "err should be nil")
+	var buf bytes.Buffer
+	html.Render(&buf, doc)
+	actual := buf.String()
+	assert.Equal(t, "<a>&#34;&#39;=nameバナナ \t=&#34;bad&#34; keynameバナナ=&#34;good&#34;&gt;hello</a>", actual, "parser should reject certain characters")
+}
+
+func Test_Clean_AttrNames(t *testing.T) {
+	// note: T() will scrub these attr inputs, so we bypass the normalization process here
+	c := NewEmptyCleaner().AddTags(T(atom.A)).(*cleaner)
+	c.w[atom.A].AllowedAttrs["s\te"] = struct{}{}
+	c.w[atom.A].AllowedAttrs["s\re"] = struct{}{}
+	c.w[atom.A].AllowedAttrs["s\ne"] = struct{}{}
+	c.w[atom.A].AllowedAttrs["s e"] = struct{}{}
+	c.w[atom.A].AllowedAttrs["s/e"] = struct{}{}
+	c.w[atom.A].AllowedAttrs["s=e"] = struct{}{}
+	c.w[atom.A].AllowedAttrs["s'e"] = struct{}{}
+	c.w[atom.A].AllowedAttrs["s\"e"] = struct{}{}
+	c.w[atom.A].AllowedAttrs["s>e"] = struct{}{}
+	c.w[atom.A].AllowedAttrs["s\u0000e"] = struct{}{}
+
+	for input, expected := range attrNames {
+		doc, err := c.Clean(strings.NewReader(input))
+		var buf bytes.Buffer
+		html.Render(&buf, doc)
+		actual := buf.String()
+		assert.Nil(t, err, "unexpected error: %v", err)
+		assert.Equal(t, expected, actual, "expected %s but got %s", expected, actual)
+	}
+}
+
 func ele(attrs ...string) *html.Node {
 	attributes := []html.Attribute{}
 	for _, key := range attrs {
@@ -271,6 +306,19 @@ var basicWhitelistKillChildren = map[string]string{
 	`plain text`:                            `plain text`,
 	`plain text<!-- comment -->`:            `plain text`,
 	`<p>plain text</p><div>more text</div>`: `<p>plain text</p>`,
+}
+
+var attrNames = map[string]string{
+	"<a s\te=\"foo\">bar</a>":     `<a>bar</a>`,
+	"<a s\re=\"foo\">bar</a>":     `<a>bar</a>`,
+	"<a s\ne=\"foo\">bar</a>":     `<a>bar</a>`,
+	"<a s\"e=\"foo\">bar</a>":     `<a>bar</a>`,
+	"<a s=e=\"foo\">bar</a>":      `<a>bar</a>`,
+	"<a s e=\"foo\">bar</a>":      `<a>bar</a>`,
+	"<a s'e=\"foo\">bar</a>":      `<a>bar</a>`,
+	"<a s/e=\"foo\">bar</a>":      `<a>bar</a>`,
+	"<a s\u0000e=\"foo\">bar</a>": `<a>bar</a>`,
+	"<a s>e=\"foo\">bar</a>":      "<a>e=&#34;foo&#34;&gt;bar</a>", // &gt; will close the anchor tag
 }
 
 type badReader struct{}

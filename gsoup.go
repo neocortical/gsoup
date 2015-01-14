@@ -1,6 +1,5 @@
 package gsoup
 
-import "strings"
 import "golang.org/x/net/html/atom"
 
 // NewEmptyCleaner creates a cleaner with no allowed tags
@@ -19,7 +18,7 @@ func T(tag atom.Atom, attrs ...string) (def *Tagdef) {
 	def = &Tagdef{Tag: tag}
 	def.AllowedAttrs = make(Attrset)
 	for _, attr := range attrs {
-		def.AllowedAttrs[strings.ToLower(attr)] = struct{}{}
+		def.AllowedAttrs[normalizeAttrKey(attr)] = struct{}{}
 	}
 	return def
 }

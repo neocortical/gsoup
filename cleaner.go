@@ -2,7 +2,6 @@ package gsoup
 
 import (
 	"io"
-	"strings"
 
 	"golang.org/x/net/html"
 	"golang.org/x/net/html/atom"
@@ -88,9 +87,10 @@ func stripInvalidAttributes(n *html.Node, tagdef *Tagdef) {
 	attrMap := make(map[string]int)
 	newAttr := n.Attr[:0]
 	for _, attr := range n.Attr {
-		_, attrAllowed := tagdef.AllowedAttrs[strings.ToLower(attr.Key)]
+		normalizedAttr := normalizeAttrKey(attr.Key)
+		_, attrAllowed := tagdef.AllowedAttrs[normalizedAttr]
 		if attrAllowed {
-			attr.Key = strings.ToLower(attr.Key)
+			attr.Key = normalizedAttr
 			newAttr = append(newAttr, attr)
 			attrMap[attr.Key] = len(newAttr) - 1
 		}

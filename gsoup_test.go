@@ -23,3 +23,10 @@ func Test_T(t *testing.T) {
 	_, ok = def.AllowedAttrs["ID"]
 	assert.True(t, !ok, "'ID' should not be an attribute")
 }
+
+func Test_T_EscapesAttrKeys(t *testing.T) {
+	def := T(atom.Div, "  key/\r\n\t >\"'=name\u0000バナナ \t")
+	_, normalizedKeyExists := def.AllowedAttrs["keynameバナナ"]
+	assert.Equal(t, 1, len(def.AllowedAttrs), "tagdef should only have one allowed attr")
+	assert.True(t, normalizedKeyExists, "expected 'keynameバナナ' but key doesn't exist")
+}

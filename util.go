@@ -1,6 +1,10 @@
 package gsoup
 
-import "golang.org/x/net/html/atom"
+import (
+	"strings"
+
+	"golang.org/x/net/html/atom"
+)
 
 func cloneWhitelist(in whitelist) (out whitelist) {
 	out = make(map[atom.Atom]*Tagdef)
@@ -18,4 +22,13 @@ func cloneWhitelist(in whitelist) (out whitelist) {
 		out[tag] = newdef
 	}
 	return out
+}
+
+func normalizeAttrKey(key string) string {
+	return strings.ToLower(strings.Map(func(r rune) rune {
+		if strings.IndexRune("\n\r\t />\"='\u0000", r) < 0 {
+			return r
+		}
+		return -1
+	}, key))
 }

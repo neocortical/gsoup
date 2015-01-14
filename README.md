@@ -53,7 +53,7 @@ cleaner = gsoup.NewEmptyCleaner()
 
 This package is in Alpha and may change. Comments, feature requests, bug reports, pull requests all welcome!
 
-Version 0.3.0
+Version 0.4.0
 
 ## License
 
