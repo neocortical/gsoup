@@ -1,6 +1,7 @@
 package gsoup
 
 import (
+	"io"
 	"strings"
 
 	"golang.org/x/net/html"
@@ -10,7 +11,7 @@ import (
 // Cleaner defines the interface for sanitizing markup
 type Cleaner interface {
 	// Clean sanizitizes HTML input based on the cleaner's rules
-	Clean(string) (*html.Node, error)
+	Clean(io.Reader) (*html.Node, error)
 	// AddTags adds acceptable tags (and their allowed attributes) to the whitelist
 	AddTags(tags ...Tagdef) Cleaner
 	// RemoveTags removes tags that should be deleted during sanitization
@@ -28,8 +29,8 @@ type cleaner struct {
 	preserveChildren bool
 }
 
-func (c *cleaner) Clean(input string) (*html.Node, error) {
-	doc, err := html.Parse(strings.NewReader(input))
+func (c *cleaner) Clean(input io.Reader) (*html.Node, error) {
+	doc, err := html.Parse(input)
 	if err != nil {
 		return doc, err
 	}

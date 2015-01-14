@@ -2,13 +2,20 @@ package gsoup
 
 import (
 	"bytes"
+	"errors"
 	"strconv"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 	"golang.org/x/net/html"
 	"golang.org/x/net/html/atom"
 )
+
+func Test_FailGracefullyOnParseError(t *testing.T) {
+	_, err := NewEmptyCleaner().Clean(badReader{})
+	assert.NotNil(t, err, "err should not be nil")
+}
 
 func Test_stripInvalidAttributes(t *testing.T) {
 	// basic passthrough
@@ -148,7 +155,7 @@ func Test_Clean_All(t *testing.T) {
 	c := NewBasicCleaner().(*cleaner)
 
 	for input, expected := range basicWhitelistKillChildren {
-		doc, err := c.Clean(input)
+		doc, err := c.Clean(strings.NewReader(input))
 		var buf bytes.Buffer
 		html.Render(&buf, doc)
 		actual := buf.String()
@@ -158,7 +165,7 @@ func Test_Clean_All(t *testing.T) {
 
 	c.preserveChildren = true
 	for input, expected := range basicWhitelistpreserveChildren {
-		doc, err := c.Clean(input)
+		doc, err := c.Clean(strings.NewReader(input))
 		var buf bytes.Buffer
 		html.Render(&buf, doc)
 		actual := buf.String()
@@ -203,6 +210,14 @@ func Test_RemoveTags(t *testing.T) {
 	assert.False(t, ok, "div tag should still not appear in whitelist")
 }
 
+func Test_PreserveChildren(t *testing.T) {
+	c := &cleaner{}
+	assert.False(t, c.preserveChildren, "default should be false")
+	c2 := c.PreserveChildren()
+	assert.True(t, c.preserveChildren, "default should be false")
+	assert.True(t, c2.(*cleaner).preserveChildren, "default should be false for returned value")
+}
+
 func ele(attrs ...string) *html.Node {
 	attributes := []html.Attribute{}
 	for _, key := range attrs {
@@ -229,4 +244,10 @@ var basicWhitelistKillChildren = map[string]string{
 	`plain text`:                            `plain text`,
 	`plain text<!-- comment -->`:            `plain text`,
 	`<p>plain text</p><div>more text</div>`: `<p>plain text</p>`,
+}
+
+type badReader struct{}
+
+func (br badReader) Read(p []byte) (n int, err error) {
+	return 0, errors.New("i've made a terrible mistake")
 }
