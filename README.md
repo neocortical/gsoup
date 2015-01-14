@@ -54,7 +54,7 @@ cleaner = gsoup.NewEmptyCleaner().AddTags(T(atom.A).Enforce("rel", "nofollow"))
 
 This package is in Alpha and may change. Comments, feature requests, bug reports, pull requests all welcome!
 
-Gsoup ignores XMl namespaces and is only useful for HTML sanitization. It relies on Go's x/net/html package, which is not officially part of the Go language, although I hope it is canonized soon.
+Gsoup ignores XML namespaces and is only useful for HTML sanitization. It relies on Go's x/net/html package, which is not officially part of the Go language, although I hope it is canonized soon.
 
 Version 0.4.0
 
