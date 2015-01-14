@@ -264,6 +264,18 @@ func Test_Clean_AttrNames(t *testing.T) {
 	}
 }
 
+func Test_Clean_EnforcedAttrValuesProperlyEscaped(t *testing.T) {
+	c := NewEmptyCleaner().AddTags(T(atom.P).Enforce("foo", "bar\u0000\"&"))
+	input := `<p>hello</p>`
+	doc, err := c.Clean(strings.NewReader(input))
+	var buf bytes.Buffer
+	html.Render(&buf, doc)
+	actual := buf.String()
+	assert.Nil(t, err, "unexpected error: %v", err)
+	expected := "<p foo=\"bar\x00&#34;&amp;\">hello</p>"
+	assert.Equal(t, expected, actual, "expected %s but got %s", expected, actual)
+}
+
 func ele(attrs ...string) *html.Node {
 	attributes := []html.Attribute{}
 	for _, key := range attrs {
