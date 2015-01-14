@@ -235,9 +235,24 @@ func eleWithData(datum int) *html.Node {
 }
 
 var basicWhitelistpreserveChildren = map[string]string{
-	`plain text`:                            `plain text`,
-	`plain text<!-- comment -->`:            `plain text`,
-	`<p>plain text</p><div>more text</div>`: `<p>plain text</p>more text`,
+	`plain text`:                                        `plain text`,
+	`plain text<!-- comment -->`:                        `plain text`,
+	`<p>plain text</p><div>more text</div>`:             `<p>plain text</p>more text`,
+	`<SCRIPT SRC=http://ha.ckers.org/xss.js></SCRIPT>`:  ``,
+	`<IMG SRC="javascript:alert('XSS');">`:              ``,
+	`<IMG """><SCRIPT>alert("XSS")</SCRIPT>">`:          `&#34;&gt;`,
+	`<P """><SCRIPT>alert("XSS")</SCRIPT>">`:            `<p>&#34;&gt;</p>`,
+	`<p onmouseover="alert('xxs')">`:                    `<p></p>`,
+	`<P/XSS SRC="http://ha.ckers.org/xss.js"></SCRIPT>`: `<p></p>`,
+	`<<SCRIPT>alert("XSS");//<</SCRIPT>`:                `&lt;`,
+	`<BR SIZE="&{alert('XSS')}">`:                       `<br/>`,
+	`exp/*<A STYLE='no\xss:noxss("*//*");
+	xss:ex/*XSS*//*/*/pression(alert("XSS"))'>`: `exp/*<a></a>`,
+	`<!--[if gte IE 4]>
+	<SCRIPT>alert('XSS');</SCRIPT>
+	<![endif]-->`: ``,
+	`<a onmouseover="alert(document.cookie)">xxs link</a>`: `<a>xxs link</a>`,
+	`<a onmouseover=alert(document.cookie)>xxs link</a>`:   `<a>xxs link</a>`,
 }
 
 var basicWhitelistKillChildren = map[string]string{
