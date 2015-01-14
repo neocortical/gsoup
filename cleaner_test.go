@@ -21,19 +21,19 @@ func Test_stripInvalidAttributes(t *testing.T) {
 	// basic passthrough
 	elem := ele("class")
 	def := T(atom.P, "class")
-	stripInvalidAttributes(elem, &def)
+	stripInvalidAttributes(elem, def)
 	assert.Equal(t, 1, len(elem.Attr), "tag should have one attribute")
 	assert.Equal(t, "class", elem.Attr[0].Key, "elem should still contain key 'class'")
 
 	// basic strip
 	def = T(atom.P)
-	stripInvalidAttributes(elem, &def)
+	stripInvalidAttributes(elem, def)
 	assert.Equal(t, 0, len(elem.Attr), "tag should have zero attributes")
 
 	// attributes should be found case insensitive and lowercased
 	def = T(atom.P, "class")
 	elem = ele("ClAsS", "OnClicK")
-	stripInvalidAttributes(elem, &def)
+	stripInvalidAttributes(elem, def)
 	assert.Equal(t, 1, len(elem.Attr), "tag should have one attribute")
 	assert.Equal(t, "class", elem.Attr[0].Key, "elem should contain lowercased key 'class'")
 }
@@ -218,6 +218,17 @@ func Test_PreserveChildren(t *testing.T) {
 	assert.True(t, c2.(*cleaner).preserveChildren, "default should be false for returned value")
 }
 
+func Test_Clean_ShouldOverwriteEnforcedAttribute(t *testing.T) {
+	c := NewEmptyCleaner().AddTags(T(atom.A, "rel").Enforce("rel", "nofollow"))
+	input := `<a rel="foobar">hello</a>`
+	doc, err := c.Clean(strings.NewReader(input))
+	assert.Nil(t, err, "err should be nil")
+	var buf bytes.Buffer
+	html.Render(&buf, doc)
+	actual := buf.String()
+	assert.Equal(t, `<a rel="nofollow">hello</a>`, actual, "should overwrite enforced attributes")
+}
+
 func ele(attrs ...string) *html.Node {
 	attributes := []html.Attribute{}
 	for _, key := range attrs {
@@ -247,12 +258,13 @@ var basicWhitelistpreserveChildren = map[string]string{
 	`<<SCRIPT>alert("XSS");//<</SCRIPT>`:                `&lt;`,
 	`<BR SIZE="&{alert('XSS')}">`:                       `<br/>`,
 	`exp/*<A STYLE='no\xss:noxss("*//*");
-	xss:ex/*XSS*//*/*/pression(alert("XSS"))'>`: `exp/*<a></a>`,
+	xss:ex/*XSS*//*/*/pression(alert("XSS"))'>`: `exp/*<a rel="nofollow"></a>`,
 	`<!--[if gte IE 4]>
 	<SCRIPT>alert('XSS');</SCRIPT>
 	<![endif]-->`: ``,
-	`<a onmouseover="alert(document.cookie)">xxs link</a>`: `<a>xxs link</a>`,
-	`<a onmouseover=alert(document.cookie)>xxs link</a>`:   `<a>xxs link</a>`,
+	`<a onmouseover="alert(document.cookie)">xxs link</a>`: `<a rel="nofollow">xxs link</a>`,
+	`<a onmouseover=alert(document.cookie)>xxs link</a>`:   `<a rel="nofollow">xxs link</a>`,
+	`<a rel="foobar">http://google.com</a>`:                `<a rel="nofollow">http://google.com</a>`,
 }
 
 var basicWhitelistKillChildren = map[string]string{

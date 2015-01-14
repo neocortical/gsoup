@@ -15,8 +15,8 @@ func NewBasicCleaner() Cleaner {
 }
 
 // T is a shorthand method for creating a new Tagdef
-func T(tag atom.Atom, attrs ...string) (def Tagdef) {
-	def.Tag = tag
+func T(tag atom.Atom, attrs ...string) (def *Tagdef) {
+	def = &Tagdef{Tag: tag}
 	def.AllowedAttrs = make(Attrset)
 	for _, attr := range attrs {
 		def.AllowedAttrs[strings.ToLower(attr)] = struct{}{}

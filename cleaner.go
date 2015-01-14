@@ -13,7 +13,7 @@ type Cleaner interface {
 	// Clean sanizitizes HTML input based on the cleaner's rules
 	Clean(io.Reader) (*html.Node, error)
 	// AddTags adds acceptable tags (and their allowed attributes) to the whitelist
-	AddTags(tags ...Tagdef) Cleaner
+	AddTags(tags ...*Tagdef) Cleaner
 	// RemoveTags removes tags that should be deleted during sanitization
 	RemoveTags(tags ...atom.Atom) Cleaner
 	// PreserveChildren causes child nodes of deleted tags to be retained (if they themselves are allowed)
@@ -21,6 +21,7 @@ type Cleaner interface {
 }
 
 type cleaner struct {
+	// the whitelist of allowed tags and their allowed attributes
 	w whitelist
 
 	// preserveChildren controls whether children of deleted nodes are also deleted. This
@@ -40,7 +41,7 @@ func (c *cleaner) Clean(input io.Reader) (*html.Node, error) {
 	return doc, nil
 }
 
-func (c *cleaner) AddTags(tags ...Tagdef) Cleaner {
+func (c *cleaner) AddTags(tags ...*Tagdef) Cleaner {
 	for _, tagdef := range tags {
 		c.w[tagdef.Tag] = tagdef
 	}
@@ -68,7 +69,7 @@ func (c *cleaner) cleanRecursive(n *html.Node) *html.Node {
 			return c.removeElement(n)
 		}
 
-		stripInvalidAttributes(n, &tagdef)
+		stripInvalidAttributes(n, tagdef)
 
 	case html.ErrorNode, html.CommentNode, html.DoctypeNode:
 		return c.removeElement(n)
@@ -84,14 +85,28 @@ func (c *cleaner) cleanRecursive(n *html.Node) *html.Node {
 
 // stripInvalidAttributes removes non-whitelisted attributes on the node in place
 func stripInvalidAttributes(n *html.Node, tagdef *Tagdef) {
+	attrMap := make(map[string]int)
 	newAttr := n.Attr[:0]
 	for _, attr := range n.Attr {
 		_, attrAllowed := tagdef.AllowedAttrs[strings.ToLower(attr.Key)]
 		if attrAllowed {
 			attr.Key = strings.ToLower(attr.Key)
 			newAttr = append(newAttr, attr)
+			attrMap[attr.Key] = len(newAttr) - 1
 		}
 	}
+
+	// add any enforced attributes
+	for key, value := range tagdef.EnforcedAttrs {
+		index, ok := attrMap[key]
+		if ok {
+			newAttr[index].Val = value
+		} else {
+			attr := html.Attribute{Key: key, Val: value}
+			newAttr = append(newAttr, attr)
+		}
+	}
+
 	n.Attr = newAttr
 }
 

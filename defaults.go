@@ -11,7 +11,7 @@ var simpleTextWhitelist = whitelist{
 }
 
 var basicWhitelist = whitelist{
-	atom.A:          T(atom.A, "href"),
+	atom.A:          T(atom.A, "href").Enforce("rel", "nofollow"),
 	atom.B:          T(atom.B),
 	atom.Blockquote: T(atom.Blockquote, "cite"),
 	atom.Br:         T(atom.Br),
