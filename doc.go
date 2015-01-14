@@ -10,9 +10,3 @@
 //
 // This package is currently in alpha
 package gsoup
-
-// Package version info
-const VERSION = "0.1.0"
-const MAJOR_VERSION = 0
-const MINOR_VERSION = 1
-const PATCH_VERSION = 0
