@@ -219,7 +219,7 @@ func Test_PreserveChildren(t *testing.T) {
 }
 
 func Test_Clean_ShouldOverwriteEnforcedAttribute(t *testing.T) {
-	c := NewEmptyCleaner().AddTags(T(atom.A, "rel").Enforce("rel", "nofollow"))
+	c := NewEmptyCleaner().AddTags(T(atom.A, "rel").EnforceAttr("rel", "nofollow"))
 	input := `<a rel="foobar">hello</a>`
 	doc, err := c.Clean(strings.NewReader(input))
 	assert.Nil(t, err, "err should be nil")
@@ -265,7 +265,7 @@ func Test_Clean_AttrNames(t *testing.T) {
 }
 
 func Test_Clean_EnforcedAttrValuesProperlyEscaped(t *testing.T) {
-	c := NewEmptyCleaner().AddTags(T(atom.P).Enforce("foo", "bar\u0000\"&"))
+	c := NewEmptyCleaner().AddTags(T(atom.P).EnforceAttr("foo", "bar\u0000\"&"))
 	input := `<p>hello</p>`
 	doc, err := c.Clean(strings.NewReader(input))
 	var buf bytes.Buffer

@@ -11,7 +11,7 @@ func Test_cloneWhitelist(t *testing.T) {
 	w1 := whitelist{
 		atom.H1:  T(atom.H1, "class"),
 		atom.Div: T(atom.Div, "id", "class"),
-		atom.A:   T(atom.A).Enforce("rel", "nofollow"),
+		atom.A:   T(atom.A).EnforceAttr("rel", "nofollow"),
 	}
 
 	w2 := cloneWhitelist(w1)

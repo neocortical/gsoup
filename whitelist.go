@@ -27,7 +27,7 @@ type whitelist map[atom.Atom]*Tagdef
 
 // Enforce marks an attribute as enforced for a tag. Any tags encountered by the
 // parser will have the attribute key and value applied to them.
-func (t *Tagdef) Enforce(key string, value string) *Tagdef {
+func (t *Tagdef) EnforceAttr(key string, value string) *Tagdef {
 	if t.EnforcedAttrs == nil {
 		t.EnforcedAttrs = make(map[string]string)
 	}
