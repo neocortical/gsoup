@@ -15,13 +15,13 @@ Gsoup enables the sanitization of untrusted HTML markup for use in blogs, commen
 ## Basic Use
 
 ```go
-var markup = `<p onclick="alert('XSSed!')">save me</p><div>delete me?</div>`
+var markup = strings.NewReader(`<p onclick="alert('XSSed!')">save me</p><div>delete me?</div>`)
 
 doc, err := gsoup.NewBasicCleaner().Clean(markup)
 // doc is a html.Node that will render '<p>save me</p>'
 
 cleaned, err := gsoup.NewBasicCleaner().PreserveChildren().Clean(markup)
-// cleaned is a html.Node that will render '<p>save me</p>delete me?'
+// cleaned is a *html.Node that will render '<p>save me</p>delete me?'
 
 ```
 ## Custom Use
@@ -33,9 +33,9 @@ cleaner := gsoup.NewBasicCleaner().AddTags(
 	)
 cleaner = cleaner.RemoveTags(atom.P)
 
-var markup = `<p>deleted</p><div id="foo" class="bar">also saved</div><canvas></canvas>`
+var markup = strings.NewReader(`<p>deleted</p><div id="foo" class="bar">also saved</div><canvas></canvas>`)
 
-doc, err := gsoup.NewBasicCleaner().Clean(strings.NewReader(markup))
+doc, err := gsoup.NewBasicCleaner().Clean(markup)
 // doc is a html.Node that will render '<div id="foo" class="bar">also saved</div><canvas></canvas>'
 
 // new Cleaner with no allowed tags
