@@ -286,6 +286,58 @@ func ele(attrs ...string) *html.Node {
 	}
 }
 
+func Test_enforceProtocol_notEnforced(t *testing.T) {
+	tdef := &Tagdef{}
+
+	result, err := enforceProtocol(tdef, "href", "javascript:alert('hi!')")
+	assert.Nil(t, err)
+	assert.Equal(t, "javascript:alert('hi!')", result)
+
+	tdef.EnforcedProtocols = make(Protomap)
+
+	result, err = enforceProtocol(tdef, "href", "javascript:alert('hi!')")
+	assert.Nil(t, err)
+	assert.Equal(t, "javascript:alert('hi!')", result)
+}
+
+func Test_enforceProtocol_invalidURL(t *testing.T) {
+	tdef := T(atom.A, "href").EnforceProtocols("href", "http", "https")
+
+	_, err := enforceProtocol(tdef, "href", ":alert('hi!')")
+	assert.NotNil(t, err)
+}
+
+func Test_enforceProtocol_relativeLink(t *testing.T) {
+	tdef := T(atom.A, "href").EnforceProtocols("href", "http", "https")
+
+	_, err := enforceProtocol(tdef, "href", "/foo/bar")
+	assert.NotNil(t, err)
+
+	tdef.AllowRelativeLinks()
+	result, err := enforceProtocol(tdef, "href", "/foo/bar")
+	assert.Nil(t, err)
+	assert.Equal(t, "/foo/bar", result)
+}
+
+func Test_enforceProtocol_allowed(t *testing.T) {
+	tdef := T(atom.A, "href").EnforceProtocols("href", "https")
+
+	_, err := enforceProtocol(tdef, "href", "HTTP://google.com?q=alan+turing")
+	assert.NotNil(t, err)
+
+	result, err := enforceProtocol(tdef, "href", "HTTPS://google.com?q=alan+turing")
+	assert.Nil(t, err)
+	assert.Equal(t, "https://google.com?q=alan+turing", result)
+
+	tdef.EnforceProtocols("href", "https", "mailto")
+	result, err = enforceProtocol(tdef, "href", "MaIlTo:nathan@neocortical.net")
+	assert.Nil(t, err)
+	assert.Equal(t, "mailto:nathan@neocortical.net", result)
+
+	result, err = enforceProtocol(tdef, "href", "javascript:MaIlTo:NATHAN@neocortical.net")
+	assert.NotNil(t, err)
+}
+
 func eleWithData(datum int) *html.Node {
 	return &html.Node{
 		Data: strconv.Itoa(datum),

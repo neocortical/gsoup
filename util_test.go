@@ -37,3 +37,23 @@ func Test_normalizeAttrKey(t *testing.T) {
 
 	assert.Equal(t, "keynameバナナ", key, "expected 'keynameバナナ' but got %s", key)
 }
+
+func Test_normalizeProtocol(t *testing.T) {
+	for raw, expected := range protocolTests {
+		actual := normalizeProtocol(raw)
+		assert.Equal(t, expected, actual)
+	}
+}
+
+var protocolTests = map[string]string{
+	"HTTP":              "http",
+	"Https":             "https",
+	"jav&#x09;ascript:": "javx09ascript",
+	"":                  "",
+	"###":               "",
+	"8chan":             "",
+	"+http":             "",
+	"a":                 "a",
+	"A":                 "a",
+	"Z":                 "z",
+}

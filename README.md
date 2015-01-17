@@ -27,33 +27,38 @@ cleaned, err := gsoup.NewBasicCleaner().PreserveChildren().Clean(markup)
 ## Custom Use
 
 ```go
-cleaner := gsoup.NewBasicCleaner().AddTags(
-		T(atom.Div, "id", "class"),
-		T(atom.Canvas),
-	)
-cleaner = cleaner.RemoveTags(atom.P)
-
-var markup = `<p>deleted</p><div id="foo" class="bar">also saved</div><canvas></canvas>`
-
-doc, err := gsoup.NewBasicCleaner().Clean(markup)
-// doc is a html.Node that will render '<div id="foo" class="bar">also saved</div><canvas></canvas>'
-
 // new Cleaner with no allowed tags
 cleaner = gsoup.NewEmptyCleaner()
+
+// completely customize allowed tags
+cleaner := gsoup.NewEmptyCleaner().AddTags(
+		T(atom.Div, "id", "class"),
+		T(atom.Canvas),
+		T(atom.P),
+	)
+
+// RemoveTags is a factory method just like AddTags
+cleaner = gsoup.NewBasicCleaner().RemoveTags(atom.P)
+
+// EnforceProtocols enforces both the specified protocols and also valid URLs
+// attributes with values that do not meet these requirements will be removed
+cleaner = gsoup.NewEmptyCleaner().AddTags(
+		T(atom.A, "href").EnforceProtocols("href", "http", "https", "mailto"),
+	)
+
 ```
 
 ## TODO
 
-* Enforced attributes (e.g. rel="nofollow")
-* Protocol enforcement for src, href attributes
 * HTML transformers like in rgrove/sanitize
-* ???
+* CSS value sanitation?
+* Even more tests for malicious vectors
 
 ## Caveats
 
 This package is in Alpha and may change. Comments, feature requests, bug reports, pull requests all welcome!
 
-Version 0.4.0
+Version 0.5.0
 
 ## License
 

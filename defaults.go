@@ -11,9 +11,9 @@ var simpleTextWhitelist = whitelist{
 }
 
 var basicWhitelist = whitelist{
-	atom.A:          T(atom.A, "href").EnforceAttr("rel", "nofollow"),
+	atom.A:          T(atom.A, "href").EnforceAttr("rel", "nofollow").EnforceProtocols("href", "ftp", "http", "https", "mailto"),
 	atom.B:          T(atom.B),
-	atom.Blockquote: T(atom.Blockquote, "cite"),
+	atom.Blockquote: T(atom.Blockquote, "cite").EnforceProtocols("cite", "http", "https"),
 	atom.Br:         T(atom.Br),
 	atom.Cite:       T(atom.Cite),
 	atom.Dd:         T(atom.Dd),

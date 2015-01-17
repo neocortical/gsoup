@@ -1,7 +1,9 @@
 package gsoup
 
 import (
+	"errors"
 	"io"
+	"net/url"
 
 	"golang.org/x/net/html"
 	"golang.org/x/net/html/atom"
@@ -28,6 +30,9 @@ type cleaner struct {
 	// Default: false
 	preserveChildren bool
 }
+
+var errorInvalidProtocol = errors.New("invalid protocol")
+var errorRelativeLink = errors.New("relative links disallowed")
 
 func (c *cleaner) Clean(input io.Reader) (*html.Node, error) {
 	doc, err := html.Parse(input)
@@ -90,9 +95,13 @@ func stripInvalidAttributes(n *html.Node, tagdef *Tagdef) {
 		normalizedAttr := normalizeAttrKey(attr.Key)
 		_, attrAllowed := tagdef.AllowedAttrs[normalizedAttr]
 		if attrAllowed {
-			attr.Key = normalizedAttr
-			newAttr = append(newAttr, attr)
-			attrMap[attr.Key] = len(newAttr) - 1
+			normalizedVal, err := enforceProtocol(tagdef, normalizedAttr, attr.Val)
+			if err == nil {
+				attr.Key = normalizedAttr
+				attr.Val = normalizedVal
+				newAttr = append(newAttr, attr)
+				attrMap[attr.Key] = len(newAttr) - 1
+			}
 		}
 	}
 
@@ -108,6 +117,38 @@ func stripInvalidAttributes(n *html.Node, tagdef *Tagdef) {
 	}
 
 	n.Attr = newAttr
+}
+
+func enforceProtocol(tagdef *Tagdef, attrKey string, attrVal string) (string, error) {
+	if tagdef.EnforcedProtocols == nil {
+		return attrVal, nil
+	}
+	allowedProtos, enforce := tagdef.EnforcedProtocols[attrKey]
+	if !enforce {
+		return attrVal, nil
+	}
+
+	// url must be parsable to be valid
+	u, err := url.Parse(attrVal)
+	if err != nil {
+		return "", err
+	}
+
+	// relative link logic
+	if !u.IsAbs() && !tagdef.allowRelativeLinks {
+		return "", errorRelativeLink
+	}
+	if !u.IsAbs() {
+		return u.String(), nil
+	}
+
+	for allowedProto := range allowedProtos {
+		if u.Scheme == allowedProto {
+			return u.String(), nil
+		}
+	}
+
+	return "", errorInvalidProtocol
 }
 
 func (c *cleaner) removeElement(n *html.Node) (result *html.Node) {

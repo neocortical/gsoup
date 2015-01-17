@@ -32,3 +32,16 @@ func normalizeAttrKey(key string) string {
 		return -1
 	}, key))
 }
+
+func normalizeProtocol(proto string) string {
+	proto = strings.Map(func(r rune) rune {
+		if strings.IndexRune("abcdefghijklmnopqrstuvwxyz0123456789+-.", r) >= 0 {
+			return r
+		}
+		return -1
+	}, strings.ToLower(proto))
+	if proto != "" && []rune(proto)[0] >= 'a' && []rune(proto)[0] <= 'z' {
+		return proto
+	}
+	return ""
+}
