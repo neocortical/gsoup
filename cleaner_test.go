@@ -338,6 +338,19 @@ func Test_enforceProtocol_allowed(t *testing.T) {
 	assert.NotNil(t, err)
 }
 
+func Test_Cleaner_protocolEnforcement(t *testing.T) {
+	c := NewBasicCleaner()
+
+	for raw, expected := range protocolEnforcementTests {
+		doc, err := c.Clean(strings.NewReader(raw))
+		var buf bytes.Buffer
+		html.Render(&buf, doc)
+		actual := buf.String()
+		assert.Nil(t, err)
+		assert.Equal(t, expected, actual)
+	}
+}
+
 func eleWithData(datum int) *html.Node {
 	return &html.Node{
 		Data: strconv.Itoa(datum),
@@ -383,6 +396,13 @@ var attrNames = map[string]string{
 	"<a s/e=\"foo\">bar</a>":      `<a>bar</a>`,
 	"<a s\u0000e=\"foo\">bar</a>": `<a>bar</a>`,
 	"<a s>e=\"foo\">bar</a>":      "<a>e=&#34;foo&#34;&gt;bar</a>", // &gt; will close the anchor tag
+}
+
+var protocolEnforcementTests = map[string]string{
+	`<a href="http://google.com">link</a>`:             `<a href="http://google.com" rel="nofollow">link</a>`,
+	`<a href="https://google.com">link</a>`:            `<a href="https://google.com" rel="nofollow">link</a>`,
+	`<a href="mailto:nathan@neocortical.net">link</a>`: `<a href="mailto:nathan@neocortical.net" rel="nofollow">link</a>`,
+	`<a href="javascript:alert('hi!')">link</a>`:       `<a rel="nofollow">link</a>`,
 }
 
 type badReader struct{}
