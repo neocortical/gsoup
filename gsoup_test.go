@@ -37,6 +37,11 @@ func Test_EmptyCleaner(t *testing.T) {
 	assert.True(t, reflect.DeepEqual(c.w, whitelist{}))
 }
 
+func Test_SimpleCleaner(t *testing.T) {
+	c := NewSimpleCleaner().(*cleaner)
+	assert.True(t, reflect.DeepEqual(c.w, simpleTextWhitelist))
+}
+
 func Test_BasicCleaner(t *testing.T) {
 	c := NewBasicCleaner().(*cleaner)
 	assert.True(t, reflect.DeepEqual(c.w, basicWhitelist))

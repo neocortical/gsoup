@@ -7,19 +7,27 @@ func NewEmptyCleaner() Cleaner {
 	return &cleaner{w: whitelist{}}
 }
 
+// NewSimpleCleaner creates a Cleaner with the default simple whitelist
+// This whitelist mirrors Jsoup's simple whitelist
+func NewSimpleCleaner() Cleaner {
+	return &cleaner{w: cloneWhitelist(simpleTextWhitelist)}
+}
+
 // NewBasicCleaner creates a Cleaner with the default basic whitelist
-// This whitelist mirror's Jsoup's basic whitelist
+// This whitelist mirrors Jsoup's basic whitelist
 func NewBasicCleaner() Cleaner {
 	return &cleaner{w: cloneWhitelist(basicWhitelist)}
 }
 
 // NewBasicCleanerWithImages creates a Cleaner with the default basic whitelist
 // that also allows <img> with http or https protocols.
-// This whitelist mirror's Jsoup's basic whitelist with images.
+// This whitelist mirrors Jsoup's basic whitelist with images.
 func NewBasicCleanerWithImages() Cleaner {
 	return &cleaner{w: cloneWhitelist(basicWhitelistWithImages)}
 }
 
+// NewRelaxedCleaner creates a Cleaner with the default relaxed whitelist
+// This whitelist mirrors Jsoup's relaxed whitelist
 func NewRelaxedCleaner() Cleaner {
 	return &cleaner{w: cloneWhitelist(relaxedWhitelist)}
 }
