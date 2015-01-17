@@ -13,6 +13,17 @@ func NewBasicCleaner() Cleaner {
 	return &cleaner{w: cloneWhitelist(basicWhitelist)}
 }
 
+// NewBasicCleanerWithImages creates a Cleaner with the default basic whitelist
+// that also allows <img> with http or https protocols.
+// This whitelist mirror's Jsoup's basic whitelist with images.
+func NewBasicCleanerWithImages() Cleaner {
+	return &cleaner{w: cloneWhitelist(basicWhitelistWithImages)}
+}
+
+func NewRelaxedCleaner() Cleaner {
+	return &cleaner{w: cloneWhitelist(relaxedWhitelist)}
+}
+
 // T is a shorthand method for creating a new Tagdef
 func T(tag atom.Atom, attrs ...string) (def *Tagdef) {
 	def = &Tagdef{Tag: tag}

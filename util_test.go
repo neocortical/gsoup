@@ -1,6 +1,7 @@
 package gsoup
 
 import (
+	"reflect"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -15,6 +16,7 @@ func Test_cloneWhitelist(t *testing.T) {
 	}
 
 	w2 := cloneWhitelist(w1)
+	assert.True(t, reflect.DeepEqual(w1, w2))
 	assert.Equal(t, w1, w2, "w2 should be equal to w1")
 	assert.Equal(t, 3, len(w2), "w2 should have 3 tag defs")
 	assert.Equal(t, w1[atom.H1], w2[atom.H1], "w1 and w2 should have equal values")

@@ -33,7 +33,7 @@ type Tagdef struct {
 
 type whitelist map[atom.Atom]*Tagdef
 
-// Enforce marks an attribute as enforced for a tag. Any tags encountered by the
+// EnforceAttr marks an attribute as enforced for a tag. Any tags encountered by the
 // parser will have the attribute key and value applied to them.
 func (t *Tagdef) EnforceAttr(key string, value string) *Tagdef {
 	if t.EnforcedAttrs == nil {
@@ -43,6 +43,9 @@ func (t *Tagdef) EnforceAttr(key string, value string) *Tagdef {
 	return t
 }
 
+// EnforceProtocols whitelists only the specified protocols for the given attr
+// (only applies to the receiver's tag of course). If protocol enforcement is
+// applied, the attr value must be a valid URL per Go's url.Parse() functionality
 func (t *Tagdef) EnforceProtocols(attr string, protocols ...string) *Tagdef {
 	if t.EnforcedProtocols == nil {
 		t.EnforcedProtocols = make(Protomap)
@@ -59,6 +62,9 @@ func (t *Tagdef) EnforceProtocols(attr string, protocols ...string) *Tagdef {
 	return t
 }
 
+// AllowRelativeLinks turns on the ability for links to be relative during protocol
+// enforcement. Thus, this setting has no effect unless EnforceProtocols has been called
+// on the receiver. Default: false.
 func (t *Tagdef) AllowRelativeLinks() *Tagdef {
 	t.allowRelativeLinks = true
 	return t

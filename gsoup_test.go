@@ -1,6 +1,7 @@
 package gsoup
 
 import (
+	"reflect"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -29,4 +30,24 @@ func Test_T_EscapesAttrKeys(t *testing.T) {
 	_, normalizedKeyExists := def.AllowedAttrs["keynameバナナ"]
 	assert.Equal(t, 1, len(def.AllowedAttrs), "tagdef should only have one allowed attr")
 	assert.True(t, normalizedKeyExists, "expected 'keynameバナナ' but key doesn't exist")
+}
+
+func Test_EmptyCleaner(t *testing.T) {
+	c := NewEmptyCleaner().(*cleaner)
+	assert.True(t, reflect.DeepEqual(c.w, whitelist{}))
+}
+
+func Test_BasicCleaner(t *testing.T) {
+	c := NewBasicCleaner().(*cleaner)
+	assert.True(t, reflect.DeepEqual(c.w, basicWhitelist))
+}
+
+func Test_BasicCleanerWithImages(t *testing.T) {
+	c := NewBasicCleanerWithImages().(*cleaner)
+	assert.True(t, reflect.DeepEqual(c.w, basicWhitelistWithImages))
+}
+
+func Test_RelaxedCleaner(t *testing.T) {
+	c := NewRelaxedCleaner().(*cleaner)
+	assert.True(t, reflect.DeepEqual(c.w, relaxedWhitelist))
 }

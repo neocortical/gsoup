@@ -13,12 +13,27 @@ func cloneWhitelist(in whitelist) (out whitelist) {
 		for attr := range tagdef.AllowedAttrs {
 			newdef.AllowedAttrs[attr] = struct{}{}
 		}
+
+		// enforced attrs
 		for key, value := range tagdef.EnforcedAttrs {
 			if newdef.EnforcedAttrs == nil {
 				newdef.EnforcedAttrs = make(map[string]string)
 			}
 			newdef.EnforcedAttrs[key] = value
 		}
+
+		// enforced protocols
+		for attr, protos := range tagdef.EnforcedProtocols {
+			if newdef.EnforcedProtocols == nil {
+				newdef.EnforcedProtocols = make(Protomap)
+			}
+			protoset := make(Protoset)
+			for proto := range protos {
+				protoset[proto] = struct{}{}
+			}
+			newdef.EnforcedProtocols[attr] = protoset
+		}
+
 		out[tag] = newdef
 	}
 	return out
