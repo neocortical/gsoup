@@ -65,7 +65,7 @@ This package is in Alpha and may change. Comments, feature requests, bug reports
 
 Gsoup ignores XML namespaces and is only useful for HTML sanitization. It relies on Go's x/net/html package, which is not officially part of the Go language, although I hope it is canonized soon.
 
-Version 0.5.0
+Version 0.6.0
 
 
 ## License
