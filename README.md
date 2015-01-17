@@ -15,15 +15,17 @@ Gsoup enables the sanitization of untrusted HTML markup for use in blogs, commen
 ## Basic Use
 
 ```go
-var markup = `<p onclick="alert('XSSed!')">save me</p><div>delete me?</div>`
+var markup = strings.NewReader(`<p onclick="alert('XSSed!')">save me</p><div>delete me?</div>`)
 
 doc, err := gsoup.NewBasicCleaner().Clean(markup)
 // doc is a html.Node that will render '<p>save me</p>'
 
 cleaned, err := gsoup.NewBasicCleaner().PreserveChildren().Clean(markup)
-// cleaned is a html.Node that will render '<p>save me</p>delete me?'
+// cleaned is a *html.Node that will render '<p>save me</p>delete me?'
 
 ```
+
+
 ## Custom Use
 
 ```go
@@ -40,12 +42,14 @@ cleaner := gsoup.NewEmptyCleaner().AddTags(
 // RemoveTags is a factory method just like AddTags
 cleaner = gsoup.NewBasicCleaner().RemoveTags(atom.P)
 
+// enforce attrs (rel="nofollow" will be added to all anchor tags)
+cleaner = gsoup.NewEmptyCleaner().AddTags(T(atom.A).Enforce("rel", "nofollow"))
+
 // EnforceProtocols enforces both the specified protocols and also valid URLs
 // attributes with values that do not meet these requirements will be removed
 cleaner = gsoup.NewEmptyCleaner().AddTags(
 		T(atom.A, "href").EnforceProtocols("href", "http", "https", "mailto"),
 	)
-
 ```
 
 ## TODO
@@ -54,11 +58,15 @@ cleaner = gsoup.NewEmptyCleaner().AddTags(
 * CSS value sanitation?
 * Even more tests for malicious vectors
 
+
 ## Caveats
 
 This package is in Alpha and may change. Comments, feature requests, bug reports, pull requests all welcome!
 
+Gsoup ignores XML namespaces and is only useful for HTML sanitization. It relies on Go's x/net/html package, which is not officially part of the Go language, although I hope it is canonized soon.
+
 Version 0.5.0
+
 
 ## License
 
