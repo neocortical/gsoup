@@ -1,9 +1,11 @@
 package gsoup
 
 import (
+	"bytes"
 	"errors"
 	"io"
 	"net/url"
+	"strings"
 
 	"golang.org/x/net/html"
 	"golang.org/x/net/html/atom"
@@ -13,6 +15,8 @@ import (
 type Cleaner interface {
 	// Clean sanizitizes HTML input based on the cleaner's rules
 	Clean(io.Reader) (*html.Node, error)
+	// CleanString is a convenience wrapper for simple, string-in-string-out cleaning of markup
+	CleanString(input string) (string, error)
 	// AddTags adds acceptable tags (and their allowed attributes) to the whitelist
 	AddTags(tags ...*Tagdef) Cleaner
 	// RemoveTags removes tags that should be deleted during sanitization
@@ -43,6 +47,19 @@ func (c *cleaner) Clean(input io.Reader) (*html.Node, error) {
 	c.cleanRecursive(doc)
 
 	return doc, nil
+}
+
+func (c *cleaner) CleanString(input string) (string, error) {
+	doc, err := c.Clean(strings.NewReader(input))
+	if err != nil {
+		return "", err
+	}
+	var buf bytes.Buffer
+	err = html.Render(&buf, doc)
+	if err != nil {
+		return "", err
+	}
+	return buf.String(), nil
 }
 
 func (c *cleaner) AddTags(tags ...*Tagdef) Cleaner {

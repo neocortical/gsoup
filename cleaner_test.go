@@ -174,6 +174,23 @@ func Test_Clean_All(t *testing.T) {
 	}
 }
 
+func Test_CleanString_All(t *testing.T) {
+	c := NewBasicCleaner().(*cleaner)
+
+	for input, expected := range basicWhitelistKillChildren {
+		actual, err := c.CleanString(input)
+		assert.Nil(t, err, "unexpected error: %v", err)
+		assert.Equal(t, expected, actual, "expected %s but got %s", expected, actual)
+	}
+
+	c.preserveChildren = true
+	for input, expected := range basicWhitelistpreserveChildren {
+		actual, err := c.CleanString(input)
+		assert.Nil(t, err, "unexpected error: %v", err)
+		assert.Equal(t, expected, actual, "expected %s but got %s", expected, actual)
+	}
+}
+
 func Test_AddTags(t *testing.T) {
 	c := NewBasicCleaner().(*cleaner)
 

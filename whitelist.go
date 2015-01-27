@@ -11,8 +11,8 @@ type Attrset map[string]struct{}
 // Protoset encapsulates a set of unique attribute value protocols
 type Protoset map[string]struct{}
 
-// Attrmap encapsulates a map of unique element attributes and their values
-// values will be escaped when set on attributes
+// Attrmap encapsulates a map of unique element attributes and their values.
+// Values will be escaped when set on attributes
 type Attrmap map[string]string
 
 // Protomap encapsulates a set of protocols to be enforced on an attribute value
@@ -44,7 +44,7 @@ func (t *Tagdef) EnforceAttr(key string, value string) *Tagdef {
 }
 
 // EnforceProtocols whitelists only the specified protocols for the given attr
-// (only applies to the receiver's tag of course). If protocol enforcement is
+// (only applies to the receiver's tag). If protocol enforcement is
 // applied, the attr value must be a valid URL per Go's url.Parse() functionality
 func (t *Tagdef) EnforceProtocols(attr string, protocols ...string) *Tagdef {
 	if t.EnforcedProtocols == nil {
