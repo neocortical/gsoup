@@ -54,7 +54,7 @@ cleaner = gsoup.NewEmptyCleaner().AddTags(
 
 ## Transformers
 
-Transform functions may be applied to any element or text nodes in your markup. Transformers are more than meets the eye, so please see the integration tests in transformer_test.go for examples of how to use transform functions. Here's a simple example that changes &lt;b&gt; tags to &lt;strong&gt; tags:
+Transform functions may be applied to any element or text nodes in your markup. Transformers are more than meets the eye, so please see the integration tests in transformer_test.go for examples of how to use them. Here's a simple example that changes &lt;b&gt; tags to &lt;strong&gt; tags:
 
 ```go
 c := NewEmptyCleaner().AddTags(T(atom.Strong))
@@ -85,7 +85,7 @@ This package is in Alpha and may change. Comments, feature requests, bug reports
 
 Gsoup ignores XML namespaces and is only useful for HTML sanitization. It relies on Go's x/net/html package, which is not officially part of the Go language, although I hope it is canonized soon.
 
-Version 0.6.0
+Version 0.7.0
 
 
 ## License
