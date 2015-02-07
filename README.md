@@ -1,5 +1,7 @@
 # Gsoup: An HTML sanitizer for Go
 
+##### Upcoming breaking change: preserving the children of deleted elements will soon be enabled by default. The current default behavior is to delete children when deleting an element. Please use the v0.7 release to retain the default behavior.
+
 ## Description
 
 Gsoup enables the sanitization of untrusted HTML markup for use in blogs, comments, etc. It is similar to Java's Jsoup or Ruby's Sanitizer (https://github.com/rgrove/sanitize). Go's x/net/html package is used under the hood for HTML parsing.
