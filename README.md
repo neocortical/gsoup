@@ -52,9 +52,29 @@ cleaner = gsoup.NewEmptyCleaner().AddTags(
 	)
 ```
 
+## Transformers
+
+Transform functions may be applied to any element or text nodes in your markup. Transformers are more than meets the eye, so please see the integration tests in transformer_test.go for examples of how to use transform functions. Here's a simple example that changes &lt;b&gt; tags to &lt;strong&gt; tags:
+
+```go
+c := NewEmptyCleaner().AddTags(T(atom.Strong))
+c.AddTransformer(func(x XNode) XNode {
+	if x.Type() == html.ElementNode && x.Atom() == atom.B {
+		x.SetAtom(atom.Strong)
+	}
+	return x
+	})
+
+out, _ := c.CleanString(`i<b>am</b>bic pen<b>tam</b>eter`)
+// out == `i<strong>am</strong>bic pen<strong>tam</strong>eter`
+```
+
+NOTE: As implied above, the results of transform functions _must still pass_ your cleaner's validation.
+
+
 ## TODO
 
-* HTML transformers like in rgrove/sanitize
+* Additional transformer use cases
 * CSS value sanitation?
 * Even more tests for malicious vectors
 

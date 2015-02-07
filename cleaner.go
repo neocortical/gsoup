@@ -23,6 +23,8 @@ type Cleaner interface {
 	RemoveTags(tags ...atom.Atom) Cleaner
 	// PreserveChildren causes child nodes of deleted tags to be retained (if they themselves are allowed)
 	PreserveChildren() Cleaner
+
+	AddTransformer(TransformFunc) Cleaner
 }
 
 type cleaner struct {
@@ -33,6 +35,9 @@ type cleaner struct {
 	// setting does not apply to elements that can contain no user-facing text (e.g. <script>)
 	// Default: false
 	preserveChildren bool
+
+	// transforms is a list of transforms registered with this cleaner
+	transforms []TransformFunc
 }
 
 var errorInvalidProtocol = errors.New("invalid protocol")
@@ -81,8 +86,34 @@ func (c *cleaner) PreserveChildren() Cleaner {
 	return c
 }
 
+func (c *cleaner) AddTransformer(t TransformFunc) Cleaner {
+	c.transforms = append(c.transforms, t)
+	return c
+}
+
 // cleanRecursive performs a depth-first traversal of the DOM, removing nodes and attributes in place as it goes
 func (c *cleaner) cleanRecursive(n *html.Node) *html.Node {
+
+	// apply any transform functions
+	if n.Type == html.ElementNode || n.Type == html.TextNode {
+		for _, transform := range c.transforms {
+			transformed := transform(newXNode(n))
+			if transformed == nil {
+				n.Parent.RemoveChild(n)
+			} else {
+				newNode := transformed.(*tnode).node
+				if newNode != n {
+					if newNode.Parent != nil {
+						newNode.Parent.RemoveChild(newNode)
+					}
+					n.Parent.InsertBefore(newNode, n)
+					n.Parent.RemoveChild(n)
+					n = newNode
+				}
+			}
+		}
+	}
+
 	switch n.Type {
 	case html.ElementNode:
 		tagdef, ok := c.w[n.DataAtom]
