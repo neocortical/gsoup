@@ -15,6 +15,10 @@ import (
 type Cleaner interface {
 	// Clean sanizitizes HTML input based on the cleaner's rules
 	Clean(io.Reader) (*html.Node, error)
+	// CleanNode sanitizes HTML in an already constructed document. NOTE: This call is
+	// destructive to the input param. The returned node will be wrapped in a
+	// DocumentNode if the input wasn't already.
+	CleanNode(root *html.Node) (*html.Node, error)
 	// CleanString is a convenience wrapper for simple, string-in-string-out cleaning of markup
 	CleanString(input string) (string, error)
 	// AddTags adds acceptable tags (and their allowed attributes) to the whitelist
@@ -47,6 +51,23 @@ func (c *cleaner) Clean(input io.Reader) (*html.Node, error) {
 	doc, err := html.Parse(input)
 	if err != nil {
 		return doc, err
+	}
+
+	c.cleanRecursive(doc)
+
+	return doc, nil
+}
+
+func (c *cleaner) CleanNode(root *html.Node) (*html.Node, error) {
+	if root == nil {
+		return root, errors.New("root cannot be nil")
+	}
+	var doc *html.Node
+	if root.Type != html.DocumentNode {
+		doc = &html.Node{Type: html.DocumentNode}
+		doc.AppendChild(root)
+	} else {
+		doc = root
 	}
 
 	c.cleanRecursive(doc)
