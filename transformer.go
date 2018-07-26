@@ -19,8 +19,12 @@ type XNode interface {
 	SetAttrs([]html.Attribute)
 }
 
-// TransformFunc describes the signature of a transform function
+// TransformFunc describes the signature of a transform function.
 type TransformFunc func(XNode) XNode
+
+// PostCleanCallback is called after transformers run and node is cleaned.
+// If the node will be deleted based on the whitelist, the second argument will be true.
+type PostCleanCallback func(XNode, bool)
 
 func newXNode(n *html.Node) XNode {
 	return &tnode{node: n}

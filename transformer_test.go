@@ -179,3 +179,16 @@ func Test_ShouldApplyMultipleTransformers(t *testing.T) {
 	assert.Equal(t, `<i>a<b>b</b></i><b>c</b>`, actual)
 
 }
+
+func Test_EmptyElement(t *testing.T) {
+	c := NewEmptyCleaner().AddTags(T(atom.Div), T(atom.I))
+	c.AddTransformer(func(x XNode) XNode {
+		if x.Type() == html.ElementNode && x.Atom() == atom.Div {
+			assert.Nil(t, x.FirstChild())
+		}
+		return x
+	})
+	actual, err := c.CleanString(`<div></div>`)
+	assert.Nil(t, err)
+	assert.Equal(t, `<div></div>`, actual)
+}

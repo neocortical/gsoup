@@ -368,6 +368,27 @@ func Test_Cleaner_protocolEnforcement(t *testing.T) {
 	}
 }
 
+func TestPostCleanCallback(t *testing.T) {
+	c := NewBasicCleaner()
+
+	input := `<html><body><p>This is some <em>rad</em> text.</p><img src="http:/example.com" /><p>Some more text.</p></body></html>`
+
+	var keepCallCount, deleteCallCount int
+
+	c.SetPostCleanCallback(func(n XNode, tombstoned bool) {
+		if tombstoned {
+			deleteCallCount++
+		} else {
+			keepCallCount++
+		}
+	})
+
+	_, err := c.CleanString(input)
+	assert.Nil(t, err)
+	assert.Equal(t, 8, keepCallCount)
+	assert.Equal(t, 4, deleteCallCount)
+}
+
 func eleWithData(datum int) *html.Node {
 	return &html.Node{
 		Data: strconv.Itoa(datum),

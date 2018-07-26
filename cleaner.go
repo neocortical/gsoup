@@ -29,6 +29,8 @@ type Cleaner interface {
 	PreserveChildren() Cleaner
 
 	AddTransformer(TransformFunc) Cleaner
+
+	SetPostCleanCallback(cb PostCleanCallback) Cleaner
 }
 
 type cleaner struct {
@@ -42,6 +44,8 @@ type cleaner struct {
 
 	// transforms is a list of transforms registered with this cleaner
 	transforms []TransformFunc
+
+	postCleanCallback PostCleanCallback
 }
 
 var errorInvalidProtocol = errors.New("invalid protocol")
@@ -112,6 +116,11 @@ func (c *cleaner) AddTransformer(t TransformFunc) Cleaner {
 	return c
 }
 
+func (c *cleaner) SetPostCleanCallback(cb PostCleanCallback) Cleaner {
+	c.postCleanCallback = cb
+	return c
+}
+
 // cleanRecursive performs a depth-first traversal of the DOM, removing nodes and attributes in place as it goes
 func (c *cleaner) cleanRecursive(n *html.Node) *html.Node {
 
@@ -139,18 +148,28 @@ func (c *cleaner) cleanRecursive(n *html.Node) *html.Node {
 	case html.ElementNode:
 		tagdef, ok := c.w[n.DataAtom]
 		if !ok {
+			if c.postCleanCallback != nil {
+				c.postCleanCallback(newXNode(n), true)
+			}
 			return c.removeElement(n)
 		}
 
 		stripInvalidAttributes(n, tagdef)
 
 	case html.ErrorNode, html.CommentNode, html.DoctypeNode:
+		if c.postCleanCallback != nil {
+			c.postCleanCallback(newXNode(n), true)
+		}
 		return c.removeElement(n)
 	}
 
 	ch := n.FirstChild
 	for ch != nil {
 		ch = c.cleanRecursive(ch)
+	}
+
+	if c.postCleanCallback != nil {
+		c.postCleanCallback(newXNode(n), false)
 	}
 
 	return n.NextSibling

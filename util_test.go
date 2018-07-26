@@ -1,10 +1,14 @@
 package gsoup
 
 import (
+	"bytes"
+	"fmt"
 	"reflect"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"golang.org/x/net/html"
 	"golang.org/x/net/html/atom"
 )
 
@@ -41,6 +45,39 @@ func Test_normalizeProtocol(t *testing.T) {
 		actual := normalizeProtocol(raw)
 		assert.Equal(t, expected, actual)
 	}
+}
+
+func TestHTML(t *testing.T) {
+	n := &html.Node{
+		Type:     html.ElementNode,
+		DataAtom: atom.P,
+		Data:     "p",
+	}
+	nodes, err := html.ParseFragment(strings.NewReader(`This is <em>SO MUCH</em> fun!`), n)
+	assert.Nil(t, err)
+
+	for i, n1 := range nodes {
+		n1.Parent = n
+		if i > 0 {
+			n1.PrevSibling = nodes[i-1]
+		}
+		if i < len(nodes)-1 {
+			n1.NextSibling = nodes[i+1]
+		}
+	}
+
+	n.FirstChild = nodes[0]
+	n.LastChild = nodes[len(nodes)-1]
+
+	var buf = &bytes.Buffer{}
+	err = html.Render(buf, n)
+	fmt.Println(buf.String())
+
+	xnode := newXNode(n)
+
+	actual, err := HTML(xnode)
+	assert.Nil(t, err)
+	assert.Equal(t, `This is <em>SO MUCH</em> fun!`, actual)
 }
 
 var protocolTests = map[string]string{

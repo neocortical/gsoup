@@ -1,8 +1,10 @@
 package gsoup
 
 import (
+	"bytes"
 	"strings"
 
+	"golang.org/x/net/html"
 	"golang.org/x/net/html/atom"
 )
 
@@ -59,4 +61,21 @@ func normalizeProtocol(proto string) string {
 		return proto
 	}
 	return ""
+}
+
+func HTML(xnode XNode) (result string, err error) {
+	var node = xnode.(*tnode).node
+	if node.FirstChild == nil {
+		return "", nil
+	}
+
+	var doc = &html.Node{
+		Type:       html.DocumentNode,
+		FirstChild: node.FirstChild,
+		LastChild:  node.LastChild,
+	}
+
+	var buf = &bytes.Buffer{}
+	err = html.Render(buf, doc)
+	return buf.String(), err
 }
