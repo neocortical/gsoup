@@ -192,3 +192,27 @@ func Test_EmptyElement(t *testing.T) {
 	assert.Nil(t, err)
 	assert.Equal(t, `<div></div>`, actual)
 }
+
+func TestGetAttr(t *testing.T) {
+	node := &tnode{
+		node: &html.Node{
+			Attr: []html.Attribute{
+				html.Attribute{Key: "foo", Namespace: "bar", Val: "baz"},
+				html.Attribute{Key: "a", Namespace: "b", Val: "c"},
+			},
+		},
+	}
+
+	attr := node.GetAttr("a")
+	assert.NotNil(t, attr)
+	assert.Equal(t, "a", attr.Key)
+	assert.Equal(t, "b", attr.Namespace)
+	assert.Equal(t, "c", attr.Val)
+
+	// object should be cloned
+	attr.Val = "f"
+	assert.Equal(t, "c", node.node.Attr[1].Val)
+
+	attr = node.GetAttr("badkey")
+	assert.Nil(t, attr)
+}

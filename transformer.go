@@ -13,6 +13,7 @@ type XNode interface {
 	Atom() atom.Atom
 	Data() string
 	Attr() []html.Attribute
+	GetAttr(key string) *html.Attribute
 	SetType(html.NodeType)
 	SetAtom(atom.Atom)
 	SetData(string)
@@ -64,6 +65,21 @@ func (t *tnode) Attr() []html.Attribute {
 	result := make([]html.Attribute, len(t.node.Attr), len(t.node.Attr))
 	copy(result, t.node.Attr)
 	return result
+}
+
+func (t *tnode) GetAttr(key string) *html.Attribute {
+	for _, attr := range t.node.Attr {
+		if attr.Key == key {
+			var result = html.Attribute{
+				Key:       attr.Key,
+				Namespace: attr.Namespace,
+				Val:       attr.Val,
+			}
+			return &result
+		}
+	}
+
+	return nil
 }
 
 func (t *tnode) SetType(newType html.NodeType) {
