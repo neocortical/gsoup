@@ -18,6 +18,8 @@ type XNode interface {
 	SetAtom(atom.Atom)
 	SetData(string)
 	SetAttrs([]html.Attribute)
+	SetAttr(key, val string)
+	DelAttr(key string)
 }
 
 // TransformFunc describes the signature of a transform function.
@@ -116,5 +118,17 @@ func (t *tnode) SetAttr(key, val string) {
 	}
 
 	t.node.Attr = append(t.node.Attr, result)
+	return
+}
+
+func (t *tnode) DelAttr(key string) {
+	var attrs = []html.Attribute{}
+	for _, attr := range t.node.Attr {
+		if attr.Key != key {
+			attrs = append(attrs, attr)
+		}
+	}
+
+	t.node.Attr = attrs
 	return
 }
