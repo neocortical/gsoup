@@ -2,6 +2,8 @@ package gsoup
 
 import (
 	"bytes"
+	"fmt"
+	"reflect"
 	"strings"
 
 	"golang.org/x/net/html"
@@ -64,7 +66,12 @@ func normalizeProtocol(proto string) string {
 }
 
 func HTML(xnode XNode) (result string, err error) {
-	var node = xnode.(*tnode).node
+	t, ok := xnode.(*tnode)
+	if !ok {
+		return result, fmt.Errorf("invalid XNode type: %s", reflect.ValueOf(xnode).Kind().String())
+	}
+
+	var node = t.node
 	if node.FirstChild == nil {
 		return "", nil
 	}
@@ -78,4 +85,20 @@ func HTML(xnode XNode) (result string, err error) {
 	var buf = &bytes.Buffer{}
 	err = html.Render(buf, doc)
 	return buf.String(), err
+}
+
+// InElement returns true if the xnode is a child of the specified atom.
+func InElement(xnode XNode, ele atom.Atom) (bool, error) {
+	t, ok := xnode.(*tnode)
+	if !ok {
+		return false, fmt.Errorf("invalid XNode type: %s", reflect.ValueOf(xnode).Kind().String())
+	}
+
+	for n := t.node.Parent; n != nil; n = n.Parent {
+		if n.Type == html.ElementNode && n.DataAtom == ele {
+			return true, nil
+		}
+	}
+
+	return false, nil
 }

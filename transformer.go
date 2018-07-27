@@ -100,3 +100,21 @@ func (t *tnode) SetData(newData string) {
 func (t *tnode) SetAttrs(newAttrs []html.Attribute) {
 	t.node.Attr = newAttrs
 }
+
+func (t *tnode) SetAttr(key, val string) {
+	var result = html.Attribute{
+		Key:       key,
+		Namespace: "",
+		Val:       val,
+	}
+
+	for i, attr := range t.node.Attr {
+		if attr.Key == key {
+			t.node.Attr[i] = result
+			return
+		}
+	}
+
+	t.node.Attr = append(t.node.Attr, result)
+	return
+}
